@@ -1,0 +1,62 @@
+{
+  "host": {
+    "name": "Host",
+    "name_zh": "华为云 IOT 服务地址",
+    "description": "Host",
+    "description_zh": "华为云 IOT 服务地址",
+    "attribute": "required",
+    "type": "string",
+    "default": "f5f46575b4.st1.iotda-device.cn-north-4.myhuaweicloud.com",
+    "valid": {
+      "length": 255
+    }
+  },
+  "port": {
+    "name": "Broker Port",
+    "name_zh": "服务器端口",
+    "description": "MQTT broker port",
+    "description_zh": "MQTT 服务器端口",
+    "attribute": "required",
+    "type": "string",
+    "default": "8883",
+    "valid": {
+      "length": 5
+    }
+  },
+  "service_id": {
+    "name": "ServiceID",
+    "name_zh": "物模型服务ID",
+    "description": "ServiceID",
+    "description_zh": "物模型服务ID",
+    "attribute": "required",
+    "type": "string",
+    "default": "ProductionService",
+    "valid": {
+      "length": 50
+    }
+  },
+  "username": {
+    "name": "UserName/DeviceID",
+    "name_zh": "用户名 / 设备ID",
+    "description": "UserName/DeviceID",
+    "description_zh": "用户名 / 设备ID",
+    "attribute": "required",
+    "type": "string",
+    "default": "66b8566af1d7e406fa9394f1_plc001",
+    "valid": {
+      "length": 255
+    }
+  },
+  "password": {
+    "name": "Password",
+    "name_zh": "密钥",
+    "description": "Password",
+    "description_zh": "密钥",
+    "attribute": "required",
+    "type": "string",
+    "default": "_999999999a",
+    "valid": {
+      "length": 255
+    }
+  }
+}
