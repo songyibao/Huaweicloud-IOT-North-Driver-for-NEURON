@@ -94,11 +94,11 @@ int handle_trans_data(neu_plugin_t *plugin, neu_reqresp_head_t *head, neu_reqres
     }
     // need free
     char *properties = transform_json_to_properties(json_str);
-    plog_notice(plugin, "parse json str succeed: %s", json_str);
-    message_send(plugin->service_id,properties);
+//    plog_debug(plugin, "parse json str succeed: %s", json_str);
+    ret = message_send(plugin->service_id,properties);
     free(json_str);
     cJSON_free(properties);
-    return 0;
+    return ret;
 }
 // Function to start a process in a specified directory
 pid_t start_process(const char *cmd, const char *dir) {

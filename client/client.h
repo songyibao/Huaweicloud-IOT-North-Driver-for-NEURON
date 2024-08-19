@@ -37,5 +37,5 @@ static void mqttDeviceSecretInit(char *address, char *port, char *deviceId, char
 void mqttDeviceCertInit(char *address, char *port, char *deviceId, char *deviceKyePassword);
 int client_init(neu_plugin_t *plugin);
 int client_uinit(neu_plugin_t *plugin);
-void message_send(char *service_id,char *properties);
+int message_send(char *service_id,char *properties);
 #endif //HUAWEICLOUD_IOT_CLIENT_H

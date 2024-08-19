@@ -162,9 +162,16 @@ static int driver_request(neu_plugin_t *plugin, neu_reqresp_head_t *head, void *
     if (plugin->started == false) {
         return 0;
     }
+    int res=0;
     switch (head->type) {
         case NEU_REQRESP_TRANS_DATA:
-            handle_trans_data(plugin, head, data);
+            res=handle_trans_data(plugin, head, data);
+            if(res!=0){
+                plog_error(plugin,"数据上报失败");
+            }else{
+                plog_notice(plugin,"数据上报成功");
+            }
+            break;
         default:
             break;
     }

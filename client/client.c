@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "client.h"
-
+#include <syslog.h>
 /*
  * Basic examples
  * Including: 1. secret authentication
@@ -53,11 +53,13 @@ void TimeSleep(int ms)
 
 static void MyPrintLog(int level, char *format, va_list args)
 {
-    vprintf(format, args);
+//    vprintf(format, args);
+//    vsyslog(level, format, args);
     /*
      * if you want to printf log in system log files, you can do this:
      * vsyslog(level, format, args);
      */
+    nlog_debug(format, args);
 }
 
 // Message downstream sending callback
@@ -173,8 +175,9 @@ int client_init(neu_plugin_t *plugin){
 int client_uinit(neu_plugin_t *plugin){
     return IOTA_Destroy();
 }
-void message_send(char *service_id,char *properties)
+int message_send(char *service_id,char *properties)
 {
+    int res=0;
     const int serviceNum = 1; // reported services' totol count
     ST_IOTA_SERVICE_DATA_INFO services[serviceNum];
 
@@ -186,7 +189,9 @@ void message_send(char *service_id,char *properties)
     int messageId = IOTA_PropertiesReport(services, serviceNum, 0, NULL);
     if (messageId < 0) {
         PrintfLog(EN_LOG_LEVEL_ERROR, "properties_test: Test_PropertiesReport() failed, messageId %d\n", messageId);
+        res=-1;
     }
 
     MemFree(&services[0].event_time);
+    return res;
 }
