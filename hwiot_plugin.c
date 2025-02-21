@@ -128,6 +128,7 @@ static int driver_start(neu_plugin_t *plugin)
     plugin->common.link_state = NEU_NODE_LINK_STATE_CONNECTED;
 //    plugin->pid = start_process("/opt/huaweicloud-iot-device-sdk-c-1.2.0/MQTT_Demo","/opt/huaweicloud-iot-device-sdk-c-1.2.0/");
     // 创建线程
+    plog_info(plugin,"创建华为 iot client 线程");
     client_init(plugin);
     return 0;
 }
@@ -156,18 +157,25 @@ static int driver_uninit(neu_plugin_t *plugin)
 
 static int driver_request(neu_plugin_t *plugin, neu_reqresp_head_t *head, void *data)
 {
-    plog_notice(plugin,
+    plog_debug(plugin,
                 "============================================================request "
                 "plugin============================================================\n");
     if (plugin->started == false) {
         return 0;
     }
     int res=0;
+    if(data==NULL){
+        plog_error(plugin,"data is null");
+        return -1;
+    }
     switch (head->type) {
         case NEU_REQRESP_TRANS_DATA:
-            res=handle_trans_data(plugin, head, data);
+            neu_reqresp_trans_data_t *trans_data = data;
+            plog_debug(plugin,"开始数据上报");
+
+            res=handle_trans_data(plugin, head, trans_data);
             if(res!=0){
-                plog_error(plugin,"数据上报失败");
+                plog_error(plugin,"new 数据上报失败");
             }else{
                 plog_notice(plugin,"数据上报成功");
             }

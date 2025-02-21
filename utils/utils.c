@@ -1,24 +1,30 @@
 //
 // Created by root on 8/9/24.
 //
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include "utils.h"
 #include "../client/client.h"
-int tag_ut_array_to_neu_json_read_resp_t(UT_array *tags, neu_json_read_resp_t *json)
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+int tag_ut_array_to_neu_json_read_resp_t(UT_array             *tags,
+                                         neu_json_read_resp_t *json)
 {
+    if (tags == NULL) {
+        nlog_error("[华为云]:tags is null");
+        return -1;
+    }
     int index = 0;
 
     if (0 == utarray_len(tags)) {
         return 0;
     }
-
     json->n_tag = utarray_len(tags);
-    json->tags  = (neu_json_read_resp_tag_t *) calloc(json->n_tag, sizeof(neu_json_read_resp_tag_t));
+    json->tags  = (neu_json_read_resp_tag_t *) calloc(
+        json->n_tag, sizeof(neu_json_read_resp_tag_t));
     if (NULL == json->tags) {
         return -1;
     }
@@ -31,7 +37,9 @@ int tag_ut_array_to_neu_json_read_resp_t(UT_array *tags, neu_json_read_resp_t *j
 
     return 0;
 }
-char* transform_json_to_properties(const char* json_str) {
+
+char *transform_json_to_properties(const char *json_str)
+{
     // 解析传入的 JSON 串
     cJSON *root = cJSON_Parse(json_str);
     if (root == NULL) {
@@ -46,8 +54,9 @@ char* transform_json_to_properties(const char* json_str) {
     cJSON *tags = cJSON_GetObjectItem(root, "tags");
     if (cJSON_IsArray(tags)) {
         cJSON *tag;
-        cJSON_ArrayForEach(tag, tags) {
-            cJSON *name = cJSON_GetObjectItem(tag, "name");
+        cJSON_ArrayForEach(tag, tags)
+        {
+            cJSON *name  = cJSON_GetObjectItem(tag, "name");
             cJSON *value = cJSON_GetObjectItem(tag, "value");
 
             if (cJSON_IsString(name) && cJSON_IsNumber(value)) {
@@ -56,7 +65,8 @@ char* transform_json_to_properties(const char* json_str) {
                 sprintf(formatted_value, "%.2f", value->valuedouble);
 
                 // 将格式化后的值添加到 properties 中
-                cJSON_AddNumberToObject(properties, name->valuestring, atof(formatted_value));
+                cJSON_AddNumberToObject(properties, name->valuestring,
+                                        atof(formatted_value));
             }
         }
     }
@@ -70,22 +80,24 @@ char* transform_json_to_properties(const char* json_str) {
 
     return result;
 }
-int handle_trans_data(neu_plugin_t *plugin, neu_reqresp_head_t *head, neu_reqresp_trans_data_t *trans_data)
+
+int handle_trans_data(neu_plugin_t *plugin, neu_reqresp_head_t *head,
+                      neu_reqresp_trans_data_t *trans_data)
 {
-    int                  ret             = 0;
-    char                *json_str        = NULL;
-    char                *transformed_str = NULL;
-    neu_json_read_resp_t resp            = { 0 };
+    int                  ret      = 0;
+    char                *json_str = NULL;
+    neu_json_read_resp_t resp     = { 0 };
 
     tag_ut_array_to_neu_json_read_resp_t(trans_data->tags, &resp);
     for (int i = 0; i < resp.n_tag; i++) {
         if (resp.tags[i].error != 0) {
-            plog_error(plugin, "tag %s error: %ld", resp.tags[i].name, resp.tags[i].error);
+            plog_error(plugin, "tag %s error: %ld", resp.tags[i].name,
+                       resp.tags[i].error);
             return -1;
         }
     }
     ret = neu_json_encode_by_fn(&resp, neu_json_encode_read_resp, &json_str);
-    if(resp.tags!=NULL){
+    if (resp.tags != NULL) {
         free(resp.tags);
     }
     if (ret != 0) {
@@ -94,14 +106,16 @@ int handle_trans_data(neu_plugin_t *plugin, neu_reqresp_head_t *head, neu_reqres
     }
     // need free
     char *properties = transform_json_to_properties(json_str);
-//    plog_debug(plugin, "parse json str succeed: %s", json_str);
-    ret = message_send(plugin->service_id,properties);
+    plog_debug(plugin, "transform json str succeed: %s", properties);
+    ret = message_send(plugin->service_id, properties, plugin);
     free(json_str);
     cJSON_free(properties);
     return ret;
 }
+
 // Function to start a process in a specified directory
-pid_t start_process(const char *cmd, const char *dir) {
+pid_t start_process(const char *cmd, const char *dir)
+{
     pid_t pid = fork();
 
     if (pid == -1) {
@@ -113,7 +127,7 @@ pid_t start_process(const char *cmd, const char *dir) {
             perror("chdir failed");
             exit(EXIT_FAILURE);
         }
-        execlp(cmd, cmd, (char *)NULL);
+        execlp(cmd, cmd, (char *) NULL);
         // If execlp returns, it must have failed.
         perror("execlp failed");
         exit(EXIT_FAILURE);
@@ -124,7 +138,8 @@ pid_t start_process(const char *cmd, const char *dir) {
 }
 
 // Function to monitor a process
-int monitor_process(pid_t pid) {
+int monitor_process(pid_t pid)
+{
     int status;
     if (waitpid(pid, &status, 0) == -1) {
         perror("waitpid failed");
@@ -143,7 +158,8 @@ int monitor_process(pid_t pid) {
 }
 
 // Function to stop a process
-int stop_process(pid_t pid) {
+int stop_process(pid_t pid)
+{
     if (kill(pid, SIGTERM) == 0) {
         printf("Process %d terminated\n", pid);
         return 0;

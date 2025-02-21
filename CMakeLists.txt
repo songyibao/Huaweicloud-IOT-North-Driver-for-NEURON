@@ -14,7 +14,8 @@ set(SOURCES
 
 # 添加可执行文件
 add_library(${PROJECT_NAME} SHARED
-        utils/utils.c)
+        utils/utils.c
+)
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 # 添加所有包含目录
 include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/*
@@ -22,9 +23,10 @@ include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/
         ${CMAKE_CURRENT_SOURCE_DIR}/include/util
         ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party/cjson
         ${CMAKE_CURRENT_SOURCE_DIR}/include/service
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party/libboundscheck)
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party/libboundscheck
+)
 # add the path to the neuron header
-include_directories(${PROJECT_NAME} PRIVATE /usr/local/include /usr/local/include/neuron)
+include_directories(${PROJECT_NAME} PRIVATE /usr/local/include /software/neuron/include/neuron)
 # add the path to the neuron library
 target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib /usr/local/lib/neuron /opt/huaweicloud-iot-device-sdk-c-1.2.0/lib)
 

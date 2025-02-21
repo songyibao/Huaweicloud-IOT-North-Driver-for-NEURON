@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include "client.h"
 #include <syslog.h>
+#include"iota_error_type.h"
 /*
  * Basic examples
  * Including: 1. secret authentication
@@ -59,7 +60,7 @@ static void MyPrintLog(int level, char *format, va_list args)
      * if you want to printf log in system log files, you can do this:
      * vsyslog(level, format, args);
      */
-    nlog_debug(format, args);
+//    nlog_debug(format, args);
 }
 
 // Message downstream sending callback
@@ -175,7 +176,7 @@ int client_init(neu_plugin_t *plugin){
 int client_uinit(neu_plugin_t *plugin){
     return IOTA_Destroy();
 }
-int message_send(char *service_id,char *properties)
+int message_send(char *service_id,char *properties,neu_plugin_t *plugin)
 {
     int res=0;
     const int serviceNum = 1; // reported services' totol count
@@ -186,9 +187,10 @@ int message_send(char *service_id,char *properties)
     services[0].service_id = service_id;
     services[0].properties = properties;
 
+    plog_debug(plugin,"Sending message...");
     int messageId = IOTA_PropertiesReport(services, serviceNum, 0, NULL);
-    if (messageId < 0) {
-        PrintfLog(EN_LOG_LEVEL_ERROR, "properties_test: Test_PropertiesReport() failed, messageId %d\n", messageId);
+    if(messageId!=IOTA_SUCCESS) {
+        plog_error(plugin,"Send message failed");
         res=-1;
     }
 
